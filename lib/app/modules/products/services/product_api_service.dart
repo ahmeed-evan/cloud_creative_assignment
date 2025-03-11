@@ -5,7 +5,7 @@ class ProductApiService {
 
   ProductApiService(this._apiService);
 
-  Future<Map<String, dynamic>> getProducts() async {
-    return await _apiService.get("/products");
+  Future<Map<String, dynamic>> getProducts(String endPoint) async {
+    return await _apiService.get(endPoint);
   }
 }

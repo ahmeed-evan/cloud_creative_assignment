@@ -2,7 +2,7 @@ import 'package:ecommerce_app_cloud_creative/app/modules/products/models/product
 import 'package:ecommerce_app_cloud_creative/app/modules/products/services/product_api_service.dart';
 
 abstract class ProductDataSource {
-  getProducts();
+  Future<List<Data>?> getProducts(String endPoint);
 }
 
 class ProductDataSourceImp implements ProductDataSource {
@@ -11,10 +11,11 @@ class ProductDataSourceImp implements ProductDataSource {
   ProductDataSourceImp(this._productApiService);
 
   @override
-  Future getProducts() async {
-    Map<String, dynamic> response = await _productApiService.getProducts();
+  Future<List<Data>?> getProducts(String endPoint) async {
+    Map<String, dynamic> response =
+        await _productApiService.getProducts(endPoint);
     return response["status"] == "success"
-        ? Product.fromJson(response['data'])
+        ? Product.fromJson(response).data
         : [];
   }
 }

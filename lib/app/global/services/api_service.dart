@@ -115,7 +115,7 @@ class ApiService {
             "id": 8,
             "title": "Samsung Galaxy S21 FE 5G (Lavender, 128GB)",
             "image":
-                "https://storage.googleapis.com/fir-auth-1c3bc.appspot.com/1691073671025-galaxy S21 FE.jpg",
+            "https://storage.googleapis.com/fir-auth-1c3bc.appspot.com/1691074519203-galaxy S22 5G.jpg",
             "price": 434,
             "description":
                 "Pro-grade camera, 30X Space Zoom, 120Hz AMOLED display...",

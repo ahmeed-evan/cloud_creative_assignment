@@ -1,4 +1,7 @@
+import 'package:ecommerce_app_cloud_creative/app/modules/cart/controller/cart_controller.dart';
+import 'package:ecommerce_app_cloud_creative/app/modules/wishlist/controller/wishlist_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -48,8 +51,14 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               children: [
                 _buildCard([
-                  _buildListTile(Icons.shopping_cart, "Cart", () {}),
-                  _buildListTile(Icons.favorite, "Wishlist", () {}),
+                  _buildListTile(
+                      Icons.shopping_cart,
+                      "Cart (${Get.find<CartController>().cartProductsList.length})",
+                      () {}),
+                  _buildListTile(
+                      Icons.favorite,
+                      "Wishlist (${Get.find<WishListController>().wishListProducts.length})",
+                      () {}),
                 ]),
 
                 _buildCard([

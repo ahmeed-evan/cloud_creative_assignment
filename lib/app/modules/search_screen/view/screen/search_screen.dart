@@ -1,4 +1,10 @@
+import 'package:ecommerce_app_cloud_creative/app/global/widgets/cusom_appbar.dart';
+import 'package:ecommerce_app_cloud_creative/app/modules/products/controller/product_controller.dart';
+import 'package:ecommerce_app_cloud_creative/app/modules/products/models/product.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../products/view/screen/product_details.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -9,24 +15,18 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> allProducts = [
-    {"image": "https://via.placeholder.com/150", "title": "iPhone 14", "price": "\$999"},
-    {"image": "https://via.placeholder.com/150", "title": "MacBook Pro", "price": "\$1999"},
-    {"image": "https://via.placeholder.com/150", "title": "Samsung TV", "price": "\$599"},
-    {"image": "https://via.placeholder.com/150", "title": "Sony Headphones", "price": "\$299"},
-    {"image": "https://via.placeholder.com/150", "title": "Apple Watch", "price": "\$399"},
-  ];
 
-  List<Map<String, dynamic>> filteredProducts = [];
+  List<Data> filteredProducts = [];
 
   void _filterProducts(String query) {
     setState(() {
       if (query.isEmpty) {
         filteredProducts = [];
       } else {
-        filteredProducts = allProducts
+        filteredProducts = Get.find<ProductController>()
+            .products
             .where((product) =>
-            product["title"].toLowerCase().contains(query.toLowerCase()))
+                product.title!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -35,7 +35,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Search Products")),
+      appBar: const CustomAppBar(title: "Search Products"),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
@@ -46,7 +46,8 @@ class _SearchScreenState extends State<SearchScreen> {
               decoration: InputDecoration(
                 labelText: "Search",
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
               onChanged: _filterProducts,
             ),
@@ -57,32 +58,36 @@ class _SearchScreenState extends State<SearchScreen> {
             Expanded(
               child: filteredProducts.isEmpty
                   ? _searchController.text.isEmpty
-                  ? const Center(child: Text("Start typing to search..."))
-                  : const Center(child: Text("No products found"))
+                      ? const Center(child: Text("Start typing to search..."))
+                      : const Center(child: Text("No products found"))
                   : ListView.builder(
-                itemCount: filteredProducts.length,
-                itemBuilder: (context, index) {
-                  final product = filteredProducts[index];
-                  return Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 5),
-                    child: ListTile(
-                      leading: Image.network(product["image"], width: 50, height: 50),
-                      title: Text(product["title"], style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(product["price"], style: const TextStyle(color: Colors.green)),
-                      onTap: () {
-                        // ✅ Navigate to Product Details
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => ProductDetailsScreen(product: product),
-                        //   ),
-                        // );
+                      itemCount: filteredProducts.length,
+                      itemBuilder: (context, index) {
+                        final product = filteredProducts[index];
+                        return Card(
+                          elevation: 2,
+                          margin: const EdgeInsets.symmetric(vertical: 5),
+                          child: ListTile(
+                            leading: Image.network(product.image ?? '',
+                                width: 50, height: 50),
+                            title: Text(product.title ?? '',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                            subtitle: Text(product.price.toString(),
+                                style: const TextStyle(color: Colors.green)),
+                            onTap: () {
+                              FocusScope.of(context).unfocus();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProductDetailsScreen(product: product),
+                                ),
+                              );
+                            },
+                          ),
+                        );
                       },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),
