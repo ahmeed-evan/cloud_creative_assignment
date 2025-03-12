@@ -6,28 +6,28 @@ import 'package:flutter/material.dart';
 import '../../../profile/view/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  HomeScreen({Key? key}) : super(key: key); // Pass the key to super
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   // Screens for bottom navigation
   final List<Widget> _screens = [
-    ProductScreen(),
-    SearchScreen(),
-    WishlistScreen(),
-    ProfileScreen()
+    const ProductScreen(),
+    const SearchScreen(),
+    const WishlistScreen(),
+    const ProfileScreen()
   ];
 
-  void _onBottomNavTap(int index) {
+  void onBottomNavTap(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: _onBottomNavTap,
+        onTap: onBottomNavTap,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,

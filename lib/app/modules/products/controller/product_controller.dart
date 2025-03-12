@@ -8,14 +8,37 @@ class ProductController extends GetxController with StateMixin {
 
   ProductController(this._productDataSource);
 
-  List<Data> products=<Data>[];
+  RxList<Data> products = <Data>[].obs;
+  RxBool isLoadingMore = false.obs;
+  int currentPage = 1;
 
-  getProducts() async {
+  // 🔹 Initial Data Load
+  void getProducts() async {
     change(null, status: RxStatus.loading());
-    products = await _productDataSource.getProducts('/products?page=1') ?? [];
-    print(products);
+    final newProducts =
+    await _productDataSource.getProducts('/products?page=$currentPage');
+    if (newProducts != null && newProducts.isNotEmpty) {
+      products.addAll(newProducts);
+    }
     change(null, status: RxStatus.success());
   }
+
+  // 🔹 Load More Data when scrolling to the bottom
+  Future<void> loadMoreProducts() async {
+    if (isLoadingMore.value) return; // Prevent duplicate calls
+
+    isLoadingMore.value = true;
+    currentPage++;
+
+    final newProducts =
+    await _productDataSource.getProducts('/products?page=$currentPage');
+    if (newProducts != null && newProducts.isNotEmpty) {
+      products.addAll(newProducts);
+    }
+
+    isLoadingMore.value = false;
+  }
+
 
   final List<Map<String, dynamic>> categories = [
     {"icon": Icons.phone_iphone, "name": "Mobiles"},

@@ -5,13 +5,16 @@ import 'package:ecommerce_app_cloud_creative/app/modules/products/services/produ
 import 'package:ecommerce_app_cloud_creative/app/modules/wishlist/controller/wishlist_controller.dart';
 import 'package:get/get.dart';
 
+import '../../modules/products/controller/product_controller.dart';
+
 class GlobalBinding extends Bindings {
   @override
   void dependencies() {
     ApiService apiService = ApiService();
     ProductApiService productApiService = ProductApiService(apiService);
-    Get.put<ProductDataSource>(ProductDataSourceImp(productApiService),
-        permanent: true);
+    ProductDataSource productDataSource =
+        ProductDataSourceImp(productApiService);
+    Get.put(ProductController(productDataSource), permanent: true);
     Get.put(WishListController(), permanent: true);
     Get.put(CartController(), permanent: true);
   }

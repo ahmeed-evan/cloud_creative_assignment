@@ -1,120 +1,140 @@
 import 'package:ecommerce_app_cloud_creative/app/global/widgets/cusom_appbar.dart';
 import 'package:ecommerce_app_cloud_creative/app/modules/cart/controller/cart_controller.dart';
-import 'package:ecommerce_app_cloud_creative/app/modules/products/bindings/product_bindings.dart';
 import 'package:ecommerce_app_cloud_creative/app/modules/products/controller/product_controller.dart';
 import 'package:ecommerce_app_cloud_creative/app/modules/products/models/product.dart';
 import 'package:ecommerce_app_cloud_creative/app/modules/products/view/screen/product_details.dart';
 import 'package:ecommerce_app_cloud_creative/app/modules/wishlist/controller/wishlist_controller.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ProductScreen extends GetView<ProductController> {
+class ProductScreen extends StatefulWidget {
   const ProductScreen({super.key});
 
   @override
+  _ProductScreenState createState() => _ProductScreenState();
+}
+
+class _ProductScreenState extends State<ProductScreen> {
+  final ProductController controller = Get.find<ProductController>();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  // 🔹 Detect when user reaches bottom
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+        !controller.isLoadingMore.value) {
+      if (controller.currentPage == 2) return;
+      controller.loadMoreProducts();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    ProductBindings().dependencies();
-    // Dummy Categories
     return controller.obx(
-        (state) => Scaffold(
-              appBar: const CustomAppBar(title: "Home",),
-              body: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 🔹 Category Section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      (state) => Scaffold(
+        appBar: const CustomAppBar(title: "Home"),
+        body: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 🔹 Categories
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Categories",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  TextButton(onPressed: () {}, child: const Text("View More"))
+                ],
+              ),
+              SizedBox(
+                height: 80,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: controller.categories.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (context, index) {
+                    final category = controller.categories[index];
+                    return Column(
                       children: [
-                        const Text("Categories",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
-                        TextButton(
-                            onPressed: () {}, child: const Text("View More"))
-                      ],
-                    ),
-                    SizedBox(
-                      height: 80,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: controller.categories.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 10),
-                        itemBuilder: (context, index) {
-                          final category = controller.categories[index];
-                          return Column(
-                            children: [
-                              CircleAvatar(
-                                radius: 25,
-                                backgroundColor: Colors.blue.shade100,
-                                child: Icon(category["icon"],
-                                    size: 30, color: Colors.blue),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(category["name"],
-                                  style: const TextStyle(fontSize: 12))
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Top Products",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // 🔹 Product Grid
-                    Expanded(
-                      child: GridView.builder(
-                        itemCount: controller.products.length,
-                        // +1 for "View More"
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2, // 2 columns
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          childAspectRatio:
-                              0.7, // Aspect ratio for better layout
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundColor: Colors.blue.shade100,
+                          child: Icon(category["icon"],
+                              size: 30, color: Colors.blue),
                         ),
-                        itemBuilder: (context, index) {
-                          final product = controller.products[index];
-                          return _buildProductCard(context, product);
-                        },
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text("View More",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
-                  ],
+                        const SizedBox(height: 5),
+                        Text(category["name"],
+                            style: const TextStyle(fontSize: 12))
+                      ],
+                    );
+                  },
                 ),
               ),
-            ),
-        onLoading: const Center(
-          child: CupertinoActivityIndicator(
-            radius: 16,
+              const SizedBox(height: 15),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Top Products",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // 🔹 Infinite Scrolling Product Grid
+              Expanded(
+                child: Obx(
+                  () => GridView.builder(
+                    controller: _scrollController, // Attach controller
+                    itemCount: controller.products.length +
+                        (controller.isLoadingMore.value ? 1 : 0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 0.7,
+                    ),
+                    itemBuilder: (context, index) {
+                      if (index == controller.products.length) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        ); // Loading indicator at bottom
+                      }
+                      final product = controller.products[index];
+                      return _buildProductCard(context, product);
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+      onLoading: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
   }
 
   // 🔹 Product Card Widget
   Widget _buildProductCard(BuildContext context, Data product) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailsScreen(product: product),
-          )),
+      onTap: () => Get.to(() => ProductDetailsScreen(product: product)),
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -163,7 +183,8 @@ class ProductScreen extends GetView<ProductController> {
                           .addOrRemoveToWishList(product),
                     ),
                     ElevatedButton(
-                      onPressed: () =>Get.find<CartController>().addOrRemoveToCart(product),
+                      onPressed: () =>
+                          Get.find<CartController>().addOrRemoveToCart(product),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),

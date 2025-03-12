@@ -8,6 +8,8 @@ void main() {
   runApp(MyApp());
 }
 
+final GlobalKey<HomeScreenState> bottomNavKey = GlobalKey<HomeScreenState>();
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
       // Apply Dark Theme
       themeMode: ThemeMode.system,
       // Switches between light and dark based on system settings
-      home: HomeScreen(),
+      home: HomeScreen(key: bottomNavKey,),
       initialBinding: GlobalBinding(),
     );
   }
